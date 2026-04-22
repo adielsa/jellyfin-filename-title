@@ -9,6 +9,14 @@
     "owner": "adielsa",
     "versions": [
       {
+        "changelog": "Year preserved in title; fixed extension stripping and site watermark regex; Jellyfin 10.9+ API fixes",
+        "checksum": "f2fcdefecc49ff3c5677e1993383d9b8",
+        "sourceUrl": "https://github.com/adielsa/jellyfin-filename-title/releases/download/v1.1.0/Jellyfin.Plugin.FilenameTitlePlugin.dll",
+        "targetAbi": "10.9.0.0",
+        "timestamp": "2026-04-22T00:00:00Z",
+        "version": "1.1.0.0"
+      },
+      {
         "changelog": "Initial release",
         "checksum": "20d96ddba462dbc6c9d319d123c2403a",
         "sourceUrl": "https://github.com/adielsa/jellyfin-filename-title/releases/download/v1.0.0/Jellyfin.Plugin.FilenameTitlePlugin.dll",
