@@ -1,0 +1,21 @@
+[
+  {
+    "category": "Metadata",
+    "description": "Sets item titles from cleaned-up filenames when no metadata provider has set a title.",
+    "guid": "3f2a1b4c-5d6e-7f8a-9b0c-1d2e3f4a5b6c",
+    "imageUrl": "",
+    "name": "Filename Title",
+    "overview": "Derive item titles from filenames",
+    "owner": "adielsa",
+    "versions": [
+      {
+        "changelog": "Initial release",
+        "checksum": "20d96ddba462dbc6c9d319d123c2403a",
+        "sourceUrl": "https://github.com/adielsa/jellyfin-filename-title/releases/download/v1.0.0/Jellyfin.Plugin.FilenameTitlePlugin.dll",
+        "targetAbi": "10.9.0.0",
+        "timestamp": "2026-04-22T00:00:00Z",
+        "version": "1.0.0.0"
+      }
+    ]
+  }
+]
