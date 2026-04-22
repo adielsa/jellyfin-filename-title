@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Filename Title — Jellyfin Plugin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=JetBrains+Mono:wght@400;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #080808;
+      --surface: #101010;
+      --surface-2: #181818;
+      --border: #242424;
+      --amber: #f0a500;
+      --amber-dim: rgba(240,165,0,0.12);
+      --text: #e0dbd2;
+      --muted: #555;
+      --green: #4ade80;
+      --red: #f87171;
+      --yellow: #fbbf24;
+      --blue: #93c5fd;
+      --purple: #c4b5fd;
+    }
+
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 300;
+      overflow-x: hidden;
+    }
+
+    /* film grain */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 9999;
+      opacity: 0.035;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23g)' opacity='1'/%3E%3C/svg%3E");
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      padding: 1.1rem 2.5rem;
+      display: flex; align-items: center; justify-content: space-between;
+      transition: background 0.4s, border-color 0.4s;
+      border-bottom: 1px solid transparent;
+    }
+    nav.scrolled {
+      background: rgba(8,8,8,0.88);
+      backdrop-filter: blur(16px);
+      border-color: var(--border);
+    }
+    .nav-logo {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      color: var(--amber);
+      letter-spacing: 0.04em;
+    }
+    .nav-links { display: flex; gap: 2rem; align-items: center; }
+    .nav-links a {
+      font-size: 0.82rem; color: var(--muted);
+      text-decoration: none; transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--text); }
+
+    /* ── HERO ── */
+    .hero {
+      min-height: 100vh;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      text-align: center;
+      padding: 8rem 2rem 5rem;
+      position: relative;
+    }
+
+    .hero-eyebrow {
+      display: inline-flex; align-items: center; gap: 0.6rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      padding: 0.3rem 1rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      color: var(--amber);
+      margin-bottom: 2.5rem;
+      animation: fadeUp 0.9s ease both;
+    }
+    .dot {
+      width: 6px; height: 6px;
+      background: var(--amber); border-radius: 50%;
+      animation: blink 2.2s ease infinite;
+    }
+    @keyframes blink {
+      0%,100% { opacity:1; } 50% { opacity:0.3; }
+    }
+
+    h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 300;
+      font-size: clamp(4rem, 11vw, 9rem);
+      line-height: 0.88;
+      letter-spacing: -0.02em;
+      animation: fadeUp 0.9s 0.1s ease both;
+    }
+    h1 em { font-style: italic; color: var(--amber); }
+
+    .hero-tagline {
+      font-size: clamp(0.95rem, 2vw, 1.2rem);
+      color: var(--muted);
+      max-width: 460px;
+      line-height: 1.65;
+      margin: 2rem auto 3rem;
+      animation: fadeUp 0.9s 0.2s ease both;
+    }
+
+    .hero-cta {
+      display: flex; align-items: center; gap: 0.75rem;
+      flex-wrap: wrap; justify-content: center;
+      animation: fadeUp 0.9s 0.3s ease both;
+    }
+
+    .url-pill {
+      display: flex; align-items: center; gap: 0.75rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.65rem 1rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      color: var(--muted);
+      cursor: default;
+      transition: border-color 0.25s, background 0.25s;
+    }
+    .url-pill:hover { border-color: var(--amber); background: var(--amber-dim); color: var(--text); }
+
+    .btn-copy {
+      background: var(--amber); color: #000;
+      border: none; border-radius: 5px;
+      padding: 0.28rem 0.65rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.68rem; font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s;
+      white-space: nowrap;
+    }
+    .btn-copy:hover { opacity: 0.8; }
+
+    .btn-gh {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.65rem 1.1rem;
+      font-size: 0.82rem; color: var(--muted);
+      text-decoration: none;
+      transition: color 0.2s, border-color 0.2s;
+    }
+    .btn-gh:hover { color: var(--text); border-color: var(--muted); }
+
+    .scroll-hint {
+      position: absolute; bottom: 2.5rem; left: 50%;
+      transform: translateX(-50%);
+      display: flex; flex-direction: column; align-items: center; gap: 0.4rem;
+      color: var(--muted); font-size: 0.7rem; letter-spacing: 0.08em;
+      text-transform: uppercase;
+      animation: fadeUp 1s 1.2s ease both;
+    }
+    .scroll-line {
+      width: 1px; height: 36px;
+      background: linear-gradient(to bottom, var(--muted), transparent);
+      animation: scrollDrop 2.4s ease infinite;
+    }
+    @keyframes scrollDrop {
+      0%   { transform: scaleY(0); transform-origin: top; opacity:1; }
+      49%  { transform: scaleY(1); transform-origin: top; opacity:1; }
+      50%  { transform: scaleY(1); transform-origin: bottom; }
+      100% { transform: scaleY(0); transform-origin: bottom; opacity:0; }
+    }
+
+    /* ── SHARED ── */
+    section { padding: 6rem 2rem; }
+    .inner { max-width: 880px; margin: 0 auto; }
+
+    .eyebrow {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.68rem; letter-spacing: 0.16em;
+      color: var(--amber); text-transform: uppercase;
+      margin-bottom: 0.9rem;
+    }
+    h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 300;
+      font-size: clamp(2.2rem, 5.5vw, 3.8rem);
+      line-height: 1.05;
+      margin-bottom: 3rem;
+    }
+    h2 em { font-style: italic; color: var(--amber); }
+
+    /* fade-up reveal */
+    .reveal {
+      opacity: 0; transform: translateY(28px);
+      transition: opacity 0.75s ease, transform 0.75s ease;
+    }
+    .reveal.in { opacity: 1; transform: none; }
+    .reveal-d1 { transition-delay: 0.1s; }
+    .reveal-d2 { transition-delay: 0.2s; }
+    .reveal-d3 { transition-delay: 0.3s; }
+
+    /* ── DEMO / GIF-STYLE PLAYER ── */
+    .player-wrap {
+      border-radius: 14px; overflow: hidden;
+      border: 1px solid var(--border);
+      box-shadow: 0 50px 100px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.02);
+    }
+
+    .player-titlebar {
+      background: #0c0c0c;
+      border-bottom: 1px solid var(--border);
+      padding: 0.6rem 1rem;
+      display: flex; align-items: center; gap: 0.6rem;
+    }
+    .tb-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .tb-dot:nth-child(1) { background: #ff5f56; }
+    .tb-dot:nth-child(2) { background: #ffbd2e; }
+    .tb-dot:nth-child(3) { background: #27c93f; }
+    .tb-label {
+      margin-left: auto;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.65rem; color: var(--muted);
+    }
+
+    .player-screen {
+      background: #000;
+      min-height: 360px;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 3rem 2rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* scanlines */
+    .player-screen::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: repeating-linear-gradient(
+        0deg, transparent, transparent 3px,
+        rgba(0,0,0,0.07) 3px, rgba(0,0,0,0.07) 4px
+      );
+      pointer-events: none; z-index: 2;
+    }
+
+    /* subtle vignette */
+    .player-screen::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.5) 100%);
+      pointer-events: none; z-index: 1;
+    }
+
+    .screen-inner { position: relative; z-index: 3; width: 100%; text-align: center; }
+
+    .phase-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.62rem; letter-spacing: 0.12em;
+      color: var(--muted); text-transform: uppercase;
+      margin-bottom: 2.5rem;
+      min-height: 1em;
+      transition: opacity 0.3s;
+    }
+
+    .filename-row {
+      display: flex; flex-wrap: wrap;
+      justify-content: center; align-items: baseline;
+      gap: 0; min-height: 2.8rem; margin-bottom: 2.5rem;
+    }
+
+    .tok {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: clamp(0.6rem, 1.6vw, 0.95rem);
+      display: inline;
+      transition: color 0.35s, opacity 0.4s, max-width 0.4s, font-size 0.4s;
+      max-width: 999px; overflow: hidden;
+      white-space: nowrap;
+    }
+    .tok.title-word { color: #d4cfc6; }
+    .tok.junk-tag   { color: var(--red); }
+    .tok.year-tag   { color: var(--yellow); }
+    .tok.ext-tag    { color: var(--muted); }
+    .tok.site-tag   { color: var(--amber); }
+    .tok.strikethrough { text-decoration: line-through; opacity: 0.35; }
+    .tok.gone { opacity: 0; max-width: 0; font-size: 0; }
+
+    .result-row {
+      display: flex; align-items: center; justify-content: center; gap: 0.75rem;
+      opacity: 0; transition: opacity 0.6s;
+    }
+    .result-row.show { opacity: 1; }
+    .result-arrow { font-size: 1.2rem; color: var(--amber); }
+    .result-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 400; font-style: italic;
+      font-size: clamp(1.4rem, 3.5vw, 2.2rem);
+      color: var(--green);
+      letter-spacing: 0.01em;
+    }
+
+    .player-bar {
+      background: #0a0a0a;
+      border-top: 1px solid var(--border);
+      padding: 0.7rem 1.25rem;
+      display: flex; align-items: center; gap: 1rem;
+    }
+    .pb-counter {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.62rem; color: var(--muted); white-space: nowrap;
+    }
+    .pb-track {
+      flex: 1; height: 2px;
+      background: var(--surface-2); border-radius: 2px; overflow: hidden;
+    }
+    .pb-fill {
+      height: 100%; width: 0%;
+      background: linear-gradient(90deg, var(--amber), #ffcc55);
+      border-radius: 2px;
+      transition: width 0.1s linear;
+    }
+
+    /* ── HOW IT WORKS ── */
+    .steps {
+      display: grid; grid-template-columns: repeat(3,1fr);
+      gap: 1px; background: var(--border);
+      border: 1px solid var(--border); border-radius: 12px; overflow: hidden;
+    }
+    .step {
+      background: var(--surface);
+      padding: 2.5rem 2rem;
+    }
+    .step-n {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 5rem; font-weight: 300; line-height: 1;
+      color: var(--border);
+      margin-bottom: 1.25rem;
+    }
+    .step h3 {
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 500; font-size: 0.95rem;
+      margin-bottom: 0.6rem;
+    }
+    .step p { font-size: 0.85rem; color: var(--muted); line-height: 1.65; }
+
+    /* ── TAGS ── */
+    .tag-section { margin-top: 2.5rem; }
+    .tag-row-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.62rem; letter-spacing: 0.12em;
+      color: var(--muted); text-transform: uppercase;
+      margin: 1.4rem 0 0.5rem;
+    }
+    .tags { display: flex; flex-wrap: wrap; gap: 0.45rem; }
+    .tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      padding: 0.3rem 0.7rem;
+      border-radius: 4px; border: 1px solid;
+    }
+    .tag.q { background:rgba(248,113,113,.07); border-color:rgba(248,113,113,.25); color:var(--red); }
+    .tag.s { background:rgba(110,231,183,.07); border-color:rgba(110,231,183,.25); color:var(--green); }
+    .tag.c { background:rgba(251,191,36,.07);  border-color:rgba(251,191,36,.25);  color:var(--yellow); }
+    .tag.a { background:rgba(147,197,253,.07); border-color:rgba(147,197,253,.25); color:var(--blue); }
+    .tag.f { background:rgba(196,181,253,.07); border-color:rgba(196,181,253,.25); color:var(--purple); }
+    .tag.w { background:rgba(240,165,0,.07);   border-color:rgba(240,165,0,.25);   color:var(--amber); }
+
+    /* ── INSTALL ── */
+    .install-grid {
+      display: flex; flex-direction: column; gap: 1.75rem;
+    }
+    .install-item {
+      display: flex; gap: 1.5rem;
+    }
+    .install-n {
+      width: 34px; height: 34px; flex-shrink: 0;
+      border: 1px solid var(--border); border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem; color: var(--amber);
+      margin-top: 0.05rem;
+    }
+    .install-body h4 {
+      font-weight: 500; font-size: 0.95rem; margin-bottom: 0.45rem;
+    }
+    .install-body p {
+      font-size: 0.85rem; color: var(--muted); line-height: 1.6;
+    }
+    .code-block {
+      display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 7px; padding: 0.65rem 1rem; margin-top: 0.65rem;
+      font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: var(--text);
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 2.5rem 2rem;
+    }
+    .footer-inner {
+      max-width: 880px; margin: 0 auto;
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 1rem;
+    }
+    footer p { font-size: 0.78rem; color: var(--muted); }
+    footer a { color: var(--amber); text-decoration: none; font-size: 0.78rem; }
+    footer a:hover { text-decoration: underline; }
+
+    @keyframes fadeUp {
+      from { opacity:0; transform:translateY(18px); }
+      to   { opacity:1; transform:none; }
+    }
+
+    @media (max-width: 640px) {
+      .steps { grid-template-columns: 1fr; }
+      .url-pill span { display: none; }
+      nav { padding: 1rem 1.25rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="nav">
+  <span class="nav-logo">jellyfin-filename-title</span>
+  <div class="nav-links">
+    <a href="#demo">Demo</a>
+    <a href="#install">Install</a>
+    <a href="https://github.com/adielsa/jellyfin-filename-title" target="_blank">GitHub</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-eyebrow">
+    <span class="dot"></span>
+    Jellyfin Plugin &nbsp;·&nbsp; v1.0.0
+  </div>
+  <h1>Filename<br><em>Title</em></h1>
+  <p class="hero-tagline">Turns cluttered filenames into clean, readable media titles — automatically, the moment files land in your library.</p>
+  <div class="hero-cta">
+    <div class="url-pill" id="heroUrl">
+      <span>adielsa.github.io/jellyfin-filename-title/manifest.json</span>
+      <button class="btn-copy" onclick="copy(this,'https://adielsa.github.io/jellyfin-filename-title/manifest.json')">copy</button>
+    </div>
+    <a class="btn-gh" href="https://github.com/adielsa/jellyfin-filename-title" target="_blank">
+      <svg width="14" height="14" fill="currentColor" viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8"/></svg>
+      GitHub
+    </a>
+  </div>
+  <div class="scroll-hint">
+    <span>scroll</span>
+    <div class="scroll-line"></div>
+  </div>
+</section>
+
+<!-- DEMO -->
+<section id="demo">
+  <div class="inner">
+    <div class="eyebrow reveal">// animated demo</div>
+    <h2 class="reveal reveal-d1">Watch it <em>clean</em></h2>
+
+    <div class="player-wrap reveal reveal-d2">
+      <div class="player-titlebar">
+        <span class="tb-dot"></span>
+        <span class="tb-dot"></span>
+        <span class="tb-dot"></span>
+        <span class="tb-label" id="tbLabel">Jellyfin · Library Scanner</span>
+      </div>
+      <div class="player-screen">
+        <div class="screen-inner">
+          <div class="phase-label" id="phaseLabel">Waiting for new item…</div>
+          <div class="filename-row" id="filenameRow"></div>
+          <div class="result-row" id="resultRow">
+            <span class="result-arrow">→</span>
+            <span class="result-title" id="resultTitle"></span>
+          </div>
+        </div>
+      </div>
+      <div class="player-bar">
+        <span class="pb-counter" id="pbCounter">1 / 4</span>
+        <div class="pb-track"><div class="pb-fill" id="pbFill"></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section>
+  <div class="inner">
+    <div class="eyebrow reveal">// how it works</div>
+    <h2 class="reveal reveal-d1">Three steps,<br>zero effort</h2>
+    <div class="steps reveal reveal-d2">
+      <div class="step">
+        <div class="step-n">01</div>
+        <h3>Item Added</h3>
+        <p>Jellyfin fires an event the moment a new media file lands in your library.</p>
+      </div>
+      <div class="step">
+        <div class="step-n">02</div>
+        <h3>Title Unmatched</h3>
+        <p>If no scraper has set a proper title, the item still has the raw filename. The plugin detects this automatically.</p>
+      </div>
+      <div class="step">
+        <div class="step-n">03</div>
+        <h3>Clean & Apply</h3>
+        <p>Quality tags, codecs, site watermarks, and release flags are stripped. The readable title is saved back to the item.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WHAT GETS STRIPPED -->
+<section>
+  <div class="inner">
+    <div class="eyebrow reveal">// what gets stripped</div>
+    <h2 class="reveal reveal-d1">Every kind of junk,<br><em>automatically</em> removed</h2>
+    <div class="tag-section reveal reveal-d2">
+      <div class="tag-row-label">Resolution / Quality</div>
+      <div class="tags">
+        <span class="tag q">2160p</span><span class="tag q">1080p</span><span class="tag q">1080i</span>
+        <span class="tag q">720p</span><span class="tag q">480p</span><span class="tag q">4K</span><span class="tag q">UHD</span>
+      </div>
+      <div class="tag-row-label">Source</div>
+      <div class="tags">
+        <span class="tag s">BluRay</span><span class="tag s">BDRip</span><span class="tag s">WEB-DL</span>
+        <span class="tag s">WEBRip</span><span class="tag s">HDTV</span><span class="tag s">DVDRip</span>
+      </div>
+      <div class="tag-row-label">Video Codec</div>
+      <div class="tags">
+        <span class="tag c">x264</span><span class="tag c">x265</span><span class="tag c">HEVC</span>
+        <span class="tag c">H265</span><span class="tag c">AVC</span>
+      </div>
+      <div class="tag-row-label">Audio</div>
+      <div class="tags">
+        <span class="tag a">AAC</span><span class="tag a">AC3</span><span class="tag a">DTS</span>
+        <span class="tag a">TrueHD</span><span class="tag a">Atmos</span>
+      </div>
+      <div class="tag-row-label">Release Flags</div>
+      <div class="tags">
+        <span class="tag f">PROPER</span><span class="tag f">REPACK</span><span class="tag f">EXTENDED</span>
+        <span class="tag f">INTERNAL</span><span class="tag f">UNRATED</span>
+      </div>
+      <div class="tag-row-label">Site Watermarks</div>
+      <div class="tags">
+        <span class="tag w">www.EzTvX.to</span><span class="tag w">YTS.mx</span>
+        <span class="tag w">YIFY.com</span><span class="tag w">and more…</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- INSTALL -->
+<section id="install">
+  <div class="inner">
+    <div class="eyebrow reveal">// installation</div>
+    <h2 class="reveal reveal-d1">Up in <em>two steps</em></h2>
+    <div class="install-grid reveal reveal-d2">
+      <div class="install-item">
+        <div class="install-n">1</div>
+        <div class="install-body">
+          <h4>Add the repository</h4>
+          <p>In Jellyfin go to <strong>Dashboard → Plugins → Repositories</strong> and add:</p>
+          <div class="code-block">
+            <span>https://adielsa.github.io/jellyfin-filename-title/manifest.json</span>
+            <button class="btn-copy" onclick="copy(this,'https://adielsa.github.io/jellyfin-filename-title/manifest.json')">copy</button>
+          </div>
+          <p style="margin-top:.5rem">Save and restart Jellyfin.</p>
+        </div>
+      </div>
+      <div class="install-item">
+        <div class="install-n">2</div>
+        <div class="install-body">
+          <h4>Install from Catalog</h4>
+          <p>Go to <strong>Dashboard → Plugins → Catalog</strong>, find <strong>Filename Title</strong>, click Install, and restart when prompted.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-inner">
+    <p>Jellyfin Filename Title Plugin · v1.0.0</p>
+    <a href="https://github.com/adielsa/jellyfin-filename-title" target="_blank">View source on GitHub →</a>
+  </div>
+</footer>
+
+<script>
+/* ── NAV scroll ── */
+addEventListener('scroll', () =>
+  document.getElementById('nav').classList.toggle('scrolled', scrollY > 30));
+
+/* ── Reveal on scroll ── */
+const ro = new IntersectionObserver(
+  es => es.forEach(e => { if (e.isIntersecting) e.target.classList.add('in'); }),
+  { threshold: 0.08 }
+);
+document.querySelectorAll('.reveal').forEach(el => ro.observe(el));
+
+/* ── Copy helper ── */
+function copy(btn, text) {
+  navigator.clipboard.writeText(text || btn.previousElementSibling?.textContent?.trim() || '');
+  const o = btn.textContent; btn.textContent = 'copied!';
+  setTimeout(() => btn.textContent = o, 2000);
+}
+
+/* ── DEMO ANIMATION ── */
+const examples = [
+  {
+    tokens: [
+      { t: 'www.EzTvX.to_', c: 'site-tag' },
+      { t: 'The.',           c: 'title-word' },
+      { t: 'Dark.',          c: 'title-word' },
+      { t: 'Knight.',        c: 'title-word' },
+      { t: '2008.',          c: 'year-tag' },
+      { t: '1080p.',         c: 'junk-tag' },
+      { t: 'BluRay.',        c: 'junk-tag' },
+      { t: 'x264',           c: 'junk-tag' },
+      { t: '.mkv',           c: 'ext-tag' },
+    ],
+    result: 'The Dark Knight 2008',
+    label: 'Processing: The.Dark.Knight.mkv'
+  },
+  {
+    tokens: [
+      { t: 'Inception.',     c: 'title-word' },
+      { t: '2010.',          c: 'year-tag' },
+      { t: '4K.',            c: 'junk-tag' },
+      { t: 'UHD.',           c: 'junk-tag' },
+      { t: 'BluRay.',        c: 'junk-tag' },
+      { t: 'HEVC.',          c: 'junk-tag' },
+      { t: 'TrueHD.',        c: 'junk-tag' },
+      { t: 'Atmos',          c: 'junk-tag' },
+      { t: '.mkv',           c: 'ext-tag' },
+    ],
+    result: 'Inception 2010',
+    label: 'Processing: Inception.mkv'
+  },
+  {
+    tokens: [
+      { t: 'The.Office.',    c: 'title-word' },
+      { t: 'S03E05.',        c: 'title-word' },
+      { t: '720p.',          c: 'junk-tag' },
+      { t: 'WEB-DL.',        c: 'junk-tag' },
+      { t: 'AAC.',           c: 'junk-tag' },
+      { t: 'x264',           c: 'junk-tag' },
+      { t: '.mp4',           c: 'ext-tag' },
+    ],
+    result: 'The Office S03E05',
+    label: 'Processing: The.Office.S03E05.mp4'
+  },
+  {
+    tokens: [
+      { t: 'Dune.',          c: 'title-word' },
+      { t: '[2021].',        c: 'year-tag' },
+      { t: '2160p.',         c: 'junk-tag' },
+      { t: 'UHD.',           c: 'junk-tag' },
+      { t: 'DoVi.',          c: 'junk-tag' },
+      { t: 'TrueHD.',        c: 'junk-tag' },
+      { t: 'REPACK',         c: 'junk-tag' },
+      { t: '.mkv',           c: 'ext-tag' },
+    ],
+    result: 'Dune 2021',
+    label: 'Processing: Dune.mkv'
+  }
+];
+
+const phaseLabel = document.getElementById('phaseLabel');
+const filenameRow = document.getElementById('filenameRow');
+const resultRow   = document.getElementById('resultRow');
+const resultTitle = document.getElementById('resultTitle');
+const pbFill      = document.getElementById('pbFill');
+const pbCounter   = document.getElementById('pbCounter');
+const tbLabel     = document.getElementById('tbLabel');
+
+let idx = 0;
+let tids = [];
+
+function q(fn, ms) { const id = setTimeout(fn, ms); tids.push(id); return id; }
+
+function runExample(i) {
+  tids.forEach(clearTimeout); tids = [];
+  const ex = examples[i];
+  pbCounter.textContent = `${i+1} / ${examples.length}`;
+  tbLabel.textContent = ex.label;
+  pbFill.style.transition = 'none'; pbFill.style.width = '0%';
+
+  // reset
+  resultRow.classList.remove('show');
+  resultTitle.textContent = '';
+  filenameRow.innerHTML = '';
+  phaseLabel.textContent = 'New item detected in library…';
+
+  // build tokens (hidden)
+  ex.tokens.forEach((tok, j) => {
+    const span = document.createElement('span');
+    span.className = `tok ${tok.c}`;
+    span.id = `tok${j}`;
+    span.textContent = tok.t;
+    span.style.opacity = '0';
+    span.style.transition = `opacity 0.25s ${j * 0.055}s`;
+    filenameRow.appendChild(span);
+  });
+
+  // T=0.4s  show filename
+  q(() => {
+    phaseLabel.textContent = 'Reading filename…';
+    filenameRow.querySelectorAll('.tok').forEach(s => s.style.opacity = '1');
+  }, 400);
+
+  // T=1.8s  highlight junk
+  q(() => {
+    phaseLabel.textContent = 'Identifying quality tags, codecs, watermarks…';
+    ex.tokens.forEach((tok, j) => {
+      if (tok.c !== 'title-word') {
+        const el = document.getElementById(`tok${j}`);
+        if (el) el.classList.add('strikethrough');
+      }
+    });
+  }, 1800);
+
+  // T=3.2s  strip junk
+  q(() => {
+    phaseLabel.textContent = 'Stripping junk…';
+    ex.tokens.forEach((tok, j) => {
+      if (tok.c !== 'title-word') {
+        const el = document.getElementById(`tok${j}`);
+        if (el) {
+          el.style.transition = 'opacity 0.35s, max-width 0.4s 0.1s, font-size 0.4s 0.1s';
+          el.classList.add('gone');
+        }
+      }
+    });
+  }, 3200);
+
+  // T=4.4s  show result
+  q(() => {
+    phaseLabel.textContent = 'Writing clean title to library ✓';
+    resultTitle.textContent = ex.result;
+    resultRow.classList.add('show');
+  }, 4400);
+
+  // progress bar over 7s total
+  q(() => {
+    pbFill.style.transition = 'width 7s linear';
+    pbFill.style.width = '100%';
+  }, 20);
+
+  // T=7s  next
+  q(() => {
+    phaseLabel.style.opacity = '0';
+    filenameRow.style.opacity = '0';
+    resultRow.style.opacity = '0';
+    filenameRow.style.transition = 'opacity 0.5s';
+    resultRow.style.transition = 'opacity 0.5s';
+  }, 6400);
+
+  q(() => {
+    filenameRow.style.opacity = '1';
+    resultRow.style.opacity = '1';
+    filenameRow.style.transition = '';
+    resultRow.style.transition = '';
+    phaseLabel.style.opacity = '1';
+    idx = (i + 1) % examples.length;
+    runExample(idx);
+  }, 7000);
+}
+
+runExample(0);
+</script>
+</body>
+</html>
