@@ -24,8 +24,9 @@ public class FilenameCleanerService
         @"(?:www\.)?(?:\w+\.)*\w+\.(to|com|net|org|io|tv)(?=[_.\s]|$)",
         RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
-    private static readonly Regex YearRegex = new(
-        @"[\(\[]*\b(19|20)\d{2}\b[\)\]]*",
+    // Strips surrounding brackets from years like (2024) or [2024] but keeps the year itself
+    private static readonly Regex BracketedYearRegex = new(
+        @"[\(\[]+((19|20)\d{2})[\)\]]+",
         RegexOptions.Compiled);
 
     private static readonly Regex ExtraSpacesRegex = new(
@@ -52,8 +53,8 @@ public class FilenameCleanerService
             name = Regex.Replace(name, $@"\b{Regex.Escape(tag)}\b", " ", RegexOptions.IgnoreCase);
         }
 
-        // Step 5: Remove year patterns — (2024), [2024], bare 2024
-        name = YearRegex.Replace(name, " ");
+        // Step 5: Strip brackets around years — (2024) → 2024, [2024] → 2024
+        name = BracketedYearRegex.Replace(name, "$1");
 
         // Step 6: Collapse whitespace
         name = ExtraSpacesRegex.Replace(name, " ").Trim();

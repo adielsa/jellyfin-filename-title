@@ -9,9 +9,9 @@ When a media item is added to your library and its title is still the raw filena
 **Example:**
 
 ```
-www.EzTvX.to_The.Dark.Knight.2008.1080p.BluRay.x264.mkv  →  The Dark Knight
+www.EzTvX.to_The.Dark.Knight.2008.1080p.BluRay.x264.mkv  →  The Dark Knight 2008
 The.Office.S03E05.720p.WEB-DL.AAC.x264.mp4               →  The Office S03E05
-Inception.2010.4K.UHD.BluRay.HEVC.TrueHD.Atmos.mkv       →  Inception
+Inception.2010.4K.UHD.BluRay.HEVC.TrueHD.Atmos.mkv       →  Inception 2010
 ```
 
 ## Features
@@ -30,7 +30,7 @@ Inception.2010.4K.UHD.BluRay.HEVC.TrueHD.Atmos.mkv       →  Inception
 | Audio | `AAC` `AC3` `DTS` `TrueHD` `Atmos` |
 | HDR | `HDR` `HDR10` `DV` `DoVi` |
 | Release flags | `PROPER` `REPACK` `EXTENDED` `INTERNAL` |
-| Year | `(2024)` `[2024]` `2024` |
+| Year brackets | `(2024)` `[2024]` → `2024` (brackets removed, year kept) |
 | Site watermarks | `www.EzTvX.to` `YTS.mx` etc. |
 
 ## Installation
