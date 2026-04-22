@@ -37,48 +37,25 @@ Inception.2010.4K.UHD.BluRay.HEVC.TrueHD.Atmos.mkv       →  Inception
 
 ### Requirements
 
-- Jellyfin 10.9 or later (running on Linux)
-- [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
-- `sudo` access on the machine running Jellyfin
+- Jellyfin 10.9 or later
 
-### One-shot copy-paste install
+### Steps
 
-```bash
-git clone https://github.com/adielsa/jellyfin-filename-title.git
-cd jellyfin-filename-title
-dotnet build -c Release FilenameTitlePlugin/FilenameTitlePlugin.csproj
+**1. Add the repository**
 
-PLUGIN_DIR="/var/lib/jellyfin/plugins/Filename Title_1.0.0.0"
-sudo mkdir -p "$PLUGIN_DIR"
-sudo cp FilenameTitlePlugin/bin/Release/net8.0/Jellyfin.Plugin.FilenameTitlePlugin.dll "$PLUGIN_DIR/"
-sudo tee "$PLUGIN_DIR/meta.json" > /dev/null << 'EOF'
-{
-  "category": "Metadata",
-  "changelog": "Initial release",
-  "description": "Sets item titles from cleaned-up filenames when no metadata provider has set a title",
-  "guid": "3f2a1b4c-5d6e-7f8a-9b0c-1d2e3f4a5b6c",
-  "name": "Filename Title",
-  "overview": "Derive item titles from filenames",
-  "owner": "local",
-  "targetAbi": "10.9.0.0",
-  "timestamp": "2026-04-22T00:00:00.0000000Z",
-  "version": "1.0.0.0",
-  "status": "Active",
-  "autoUpdate": false,
-  "assemblies": []
-}
-EOF
-sudo chown -R jellyfin:jellyfin "$PLUGIN_DIR"
-sudo systemctl restart jellyfin
+Go to **Dashboard → Plugins → Repositories** and click `+`. Add this URL:
+
+```
+https://adielsa.github.io/jellyfin-filename-title/manifest.json
 ```
 
-After restarting, the plugin appears under **Dashboard → Plugins** as *Filename Title*.
+Save and restart Jellyfin.
 
-### Verify it loaded
+**2. Install the plugin**
 
-```bash
-sudo journalctl -u jellyfin -n 50 | grep -i "filename\|plugin"
-```
+Go to **Dashboard → Plugins → Catalog**, find **Filename Title**, and click Install.
+
+Restart Jellyfin once more when prompted — the plugin is now active.
 
 ## Development
 
