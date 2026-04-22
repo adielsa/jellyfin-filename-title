@@ -1,0 +1,12 @@
+/Download/title/FilenameTitlePlugin/bin/Debug/net8.0/Jellyfin.Plugin.FilenameTitlePlugin.deps.json
+/Download/title/FilenameTitlePlugin/bin/Debug/net8.0/Jellyfin.Plugin.FilenameTitlePlugin.dll
+/Download/title/FilenameTitlePlugin/bin/Debug/net8.0/Jellyfin.Plugin.FilenameTitlePlugin.pdb
+/Download/title/FilenameTitlePlugin/obj/Debug/net8.0/FilenameTitlePlugin.csproj.AssemblyReference.cache
+/Download/title/FilenameTitlePlugin/obj/Debug/net8.0/FilenameTitlePlugin.GeneratedMSBuildEditorConfig.editorconfig
+/Download/title/FilenameTitlePlugin/obj/Debug/net8.0/FilenameTitlePlugin.AssemblyInfoInputs.cache
+/Download/title/FilenameTitlePlugin/obj/Debug/net8.0/FilenameTitlePlugin.AssemblyInfo.cs
+/Download/title/FilenameTitlePlugin/obj/Debug/net8.0/FilenameTitlePlugin.csproj.CoreCompileInputs.cache
+/Download/title/FilenameTitlePlugin/obj/Debug/net8.0/Jellyfin.Plugin.FilenameTitlePlugin.dll
+/Download/title/FilenameTitlePlugin/obj/Debug/net8.0/refint/Jellyfin.Plugin.FilenameTitlePlugin.dll
+/Download/title/FilenameTitlePlugin/obj/Debug/net8.0/Jellyfin.Plugin.FilenameTitlePlugin.pdb
+/Download/title/FilenameTitlePlugin/obj/Debug/net8.0/ref/Jellyfin.Plugin.FilenameTitlePlugin.dll

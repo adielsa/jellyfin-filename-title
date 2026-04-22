@@ -1,0 +1,81 @@
+{
+  "format": 1,
+  "restore": {
+    "/Download/title/FilenameTitlePlugin/FilenameTitlePlugin.csproj": {}
+  },
+  "projects": {
+    "/Download/title/FilenameTitlePlugin/FilenameTitlePlugin.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "/Download/title/FilenameTitlePlugin/FilenameTitlePlugin.csproj",
+        "projectName": "Jellyfin.Plugin.FilenameTitlePlugin",
+        "projectPath": "/Download/title/FilenameTitlePlugin/FilenameTitlePlugin.csproj",
+        "packagesPath": "/home/adiel/.nuget/packages/",
+        "outputPath": "/Download/title/FilenameTitlePlugin/obj/",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "/Download/title/nuget.config",
+          "/home/adiel/.nuget/NuGet/NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net8.0"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net8.0": {
+            "targetAlias": "net8.0",
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        }
+      },
+      "frameworks": {
+        "net8.0": {
+          "targetAlias": "net8.0",
+          "dependencies": {
+            "Jellyfin.Controller": {
+              "include": "Compile, Build, Native, ContentFiles, Analyzers, BuildTransitive",
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[10.9.6, )"
+            },
+            "Jellyfin.Model": {
+              "include": "Compile, Build, Native, ContentFiles, Analyzers, BuildTransitive",
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[10.9.6, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "/home/adiel/.dotnet/sdk/8.0.420/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    }
+  }
+}
