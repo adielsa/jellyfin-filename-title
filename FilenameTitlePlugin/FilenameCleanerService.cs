@@ -17,8 +17,11 @@ public class FilenameCleanerService
         "COMPLETE", "INTERNAL"
     ];
 
+    private static readonly HashSet<string> VideoExtensions = new(StringComparer.OrdinalIgnoreCase)
+        { ".mkv", ".mp4", ".avi", ".mov", ".wmv", ".flv", ".m4v", ".ts", ".m2ts", ".webm", ".mpg", ".mpeg" };
+
     private static readonly Regex SiteNameRegex = new(
-        @"\b\w+\.(to|com|net|org|io|tv)\b",
+        @"(?:www\.)?(?:\w+\.)*\w+\.(to|com|net|org|io|tv)(?=[_.\s]|$)",
         RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
     private static readonly Regex YearRegex = new(
@@ -31,8 +34,11 @@ public class FilenameCleanerService
 
     public string Clean(string filename)
     {
-        // Step 1: Strip extension
-        var name = Path.GetFileNameWithoutExtension(filename);
+        // Step 1: Strip extension only for known media formats; bare words like "Knight" must not be lost
+        var ext = Path.GetExtension(filename);
+        var name = VideoExtensions.Contains(ext)
+            ? Path.GetFileNameWithoutExtension(filename)
+            : Path.GetFileName(filename);
 
         // Step 2: Remove site name tokens (e.g. www.eztvx.to)
         name = SiteNameRegex.Replace(name, " ");

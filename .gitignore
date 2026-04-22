@@ -1,0 +1,25 @@
+## .NET
+bin/
+obj/
+*.dll
+*.pdb
+*.exe
+*.so
+*.dylib
+*.runtimeconfig.json
+*.deps.json
+
+## IDE
+.vs/
+.vscode/
+*.csproj.user
+*.sln.user
+*.vscode/
+
+## Build
+.msbuild/
+publish/
+
+## OS
+.DS_Store
+Thumbs.db

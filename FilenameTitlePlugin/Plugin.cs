@@ -7,7 +7,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Jellyfin.Plugin.FilenameTitlePlugin;
 
-public class Plugin : BasePlugin<PluginConfiguration>
+public class Plugin : BasePlugin<PluginConfiguration>, IDisposable
 {
     private readonly ILibraryManager _libraryManager;
     private readonly FilenameCleanerService _cleaner = new();
@@ -60,18 +60,14 @@ public class Plugin : BasePlugin<PluginConfiguration>
         item.Name = cleanTitle;
         _ = _libraryManager.UpdateItemAsync(
             item,
-            item.Parent,
+            item.GetParent(),
             ItemUpdateType.MetadataEdit,
             CancellationToken.None);
     }
 
-    protected override void Dispose(bool dispose)
+    public void Dispose()
     {
-        if (dispose)
-        {
-            _libraryManager.ItemAdded -= OnItemAdded;
-        }
-
-        base.Dispose(dispose);
+        _libraryManager.ItemAdded -= OnItemAdded;
+        GC.SuppressFinalize(this);
     }
 }

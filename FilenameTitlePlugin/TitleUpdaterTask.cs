@@ -71,7 +71,7 @@ public class TitleUpdaterTask : IScheduledTask
 
                             item.Name = cleanTitle;
                             await _libraryManager
-                                .UpdateItemAsync(item, item.Parent, ItemUpdateType.MetadataEdit, cancellationToken)
+                                .UpdateItemAsync(item, item.GetParent(), ItemUpdateType.MetadataEdit, cancellationToken)
                                 .ConfigureAwait(false);
                         }
                     }
