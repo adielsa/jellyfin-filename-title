@@ -35,20 +35,50 @@ Inception.2010.4K.UHD.BluRay.HEVC.TrueHD.Atmos.mkv       →  Inception
 
 ## Installation
 
-1. Build the plugin:
-   ```bash
-   dotnet build -c Release FilenameTitlePlugin/FilenameTitlePlugin.csproj
-   ```
-2. Run the install script (requires sudo):
-   ```bash
-   bash install.sh
-   ```
-   This copies the DLL and `meta.json` to `/var/lib/jellyfin/plugins/Filename Title_1.0.0.0/` and restarts Jellyfin.
+### Requirements
 
-## Requirements
+- Jellyfin 10.9 or later (running on Linux)
+- [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
+- `sudo` access on the machine running Jellyfin
 
-- Jellyfin 10.9 or later
-- .NET 8 SDK (build only)
+### One-shot copy-paste install
+
+```bash
+git clone https://github.com/adielsa/jellyfin-filename-title.git
+cd jellyfin-filename-title
+dotnet build -c Release FilenameTitlePlugin/FilenameTitlePlugin.csproj
+
+PLUGIN_DIR="/var/lib/jellyfin/plugins/Filename Title_1.0.0.0"
+sudo mkdir -p "$PLUGIN_DIR"
+sudo cp FilenameTitlePlugin/bin/Release/net8.0/Jellyfin.Plugin.FilenameTitlePlugin.dll "$PLUGIN_DIR/"
+sudo tee "$PLUGIN_DIR/meta.json" > /dev/null << 'EOF'
+{
+  "category": "Metadata",
+  "changelog": "Initial release",
+  "description": "Sets item titles from cleaned-up filenames when no metadata provider has set a title",
+  "guid": "3f2a1b4c-5d6e-7f8a-9b0c-1d2e3f4a5b6c",
+  "name": "Filename Title",
+  "overview": "Derive item titles from filenames",
+  "owner": "local",
+  "targetAbi": "10.9.0.0",
+  "timestamp": "2026-04-22T00:00:00.0000000Z",
+  "version": "1.0.0.0",
+  "status": "Active",
+  "autoUpdate": false,
+  "assemblies": []
+}
+EOF
+sudo chown -R jellyfin:jellyfin "$PLUGIN_DIR"
+sudo systemctl restart jellyfin
+```
+
+After restarting, the plugin appears under **Dashboard → Plugins** as *Filename Title*.
+
+### Verify it loaded
+
+```bash
+sudo journalctl -u jellyfin -n 50 | grep -i "filename\|plugin"
+```
 
 ## Development
 
